@@ -1,6 +1,6 @@
 const GITHUB_USERNAME = "ankush850";
 const PORTFOLIO_TOPIC = "portfolio";
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL_MS = 1 * 60 * 60 * 1000; // 1 hour
 
 export interface GitHubRepo {
   id: number;
