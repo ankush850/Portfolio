@@ -173,6 +173,67 @@ const AwardSection = () => {
                   <TextReveal type="fade-up" delay={0.1}>
                     <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] md:text-xs font-mono border border-amber-500/20 text-amber-500/80 rounded bg-amber-500/5 uppercase tracking-[0.2em]">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      3SC AI HACKATHON 2026
+                    </span>
+                  </TextReveal>
+                  
+                  <h3 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-100 to-white uppercase tracking-widest leading-tight">
+                    <TextReveal type="blur-reveal" delay={0.2} as="span">
+                      2nd Place
+                    </TextReveal>
+                    <br />
+                    <TextReveal type="blur-reveal" delay={0.3} as="span">
+                      Hackathon Winner
+                    </TextReveal>
+                  </h3>
+
+                  <div className="text-gray-400 leading-relaxed text-sm md:text-base border-t border-white/10 pt-6 mt-2 relative w-full">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+                    
+                    <TextReveal type="fade-up" delay={0.4}>
+                      Secured 2nd Place at the 3SC AI Hackathon 2026, recognized for developing an innovative AI-powered solution that addressed real-world challenges through technology and collaboration. Demonstrated technical excellence, creativity, and effective problem-solving in a competitive hackathon environment.
+                    </TextReveal>
+
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.5, duration: 0.5 }}
+                      className="mt-8 rounded-lg overflow-hidden border border-white/10 relative group-hover:border-amber-500/30 transition-colors"
+                    >
+                      <img 
+                        src={`/assest/3SC.jpg`} 
+                        alt="3SC AI Hackathon 2026 Winner" 
+                        className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                    </motion.div>
+                  </div>
+                </div>
+            </VerticalTimelineElement>
+            <VerticalTimelineElement
+              className="vertical-timeline-element--award"
+              contentStyle={{ 
+                background: 'rgba(255, 255, 255, 0.02)', 
+                color: '#fff',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '12px',
+                boxShadow: 'none',
+                padding: '3rem'
+              }}
+              contentArrowStyle={{ borderRight: '7px solid rgba(255, 255, 255, 0.08)' }}
+              iconStyle={{ 
+                background: '#000000', 
+                color: '#FFA500', 
+                border: '1px solid rgba(255, 165, 0, 0.4)', 
+                boxShadow: '0 0 15px rgba(245,158,11,0.2)' 
+              }}
+              icon={<Trophy />}
+            >
+                <div className="flex flex-col items-center text-center gap-6 group">
+                  <TextReveal type="fade-up" delay={0.1}>
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] md:text-xs font-mono border border-amber-500/20 text-amber-500/80 rounded bg-amber-500/5 uppercase tracking-[0.2em]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                       ELITE HACK 1.0 // ELITE CODERS
                     </span>
                   </TextReveal>

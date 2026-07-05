@@ -11,7 +11,7 @@ export function DynamicTitle() {
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        document.title = "[ SYSTEM IDLE ]";
+        document.title = "SYSTEM IDLE";
       } else {
         document.title = originalTitle || "Ankush Singh Rawat | Software Developer";
       }
