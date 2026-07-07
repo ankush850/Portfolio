@@ -10,7 +10,7 @@ const AwardSection = () => {
   const ref = useRef(null);
 
   return (
-    <section id="awards" className="py-20 lg:py-24 px-6 md:px-12 relative overflow-hidden bg-transparent" ref={ref}>
+    <section id="awards" className="py-16 md:py-20 lg:py-24 px-4 md:px-12 relative overflow-hidden bg-transparent" ref={ref}>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <SectionHeader 
@@ -25,6 +25,14 @@ const AwardSection = () => {
             .vertical-timeline::before {
               background: rgba(255, 255, 255, 0.1) !important;
             }
+            .vertical-timeline-element-content {
+              padding: 1.5rem !important;
+            }
+            @media (min-width: 768px) {
+              .vertical-timeline-element-content {
+                padding: 3rem !important;
+              }
+            }
           `}} />
 
           <VerticalTimeline lineColor="rgba(255, 255, 255, 0.1)">
@@ -35,8 +43,7 @@ const AwardSection = () => {
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '12px',
-                boxShadow: 'none',
-                padding: '3rem'
+                boxShadow: 'none'
               }}
               contentArrowStyle={{ borderRight: '7px solid rgba(255, 255, 255, 0.08)' }}
               iconStyle={{ 
@@ -96,8 +103,7 @@ const AwardSection = () => {
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '12px',
-                boxShadow: 'none',
-                padding: '3rem'
+                boxShadow: 'none'
               }}
               contentArrowStyle={{ borderRight: '7px solid rgba(255, 255, 255, 0.08)' }}
               iconStyle={{ 
@@ -157,8 +163,7 @@ const AwardSection = () => {
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '12px',
-                boxShadow: 'none',
-                padding: '3rem'
+                boxShadow: 'none'
               }}
               contentArrowStyle={{ borderRight: '7px solid rgba(255, 255, 255, 0.08)' }}
               iconStyle={{ 
@@ -218,8 +223,7 @@ const AwardSection = () => {
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '12px',
-                boxShadow: 'none',
-                padding: '3rem'
+                boxShadow: 'none'
               }}
               contentArrowStyle={{ borderRight: '7px solid rgba(255, 255, 255, 0.08)' }}
               iconStyle={{ 
