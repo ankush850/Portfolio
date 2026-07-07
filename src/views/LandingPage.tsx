@@ -17,7 +17,7 @@ const LandingPage = () => {
   const toggleMute = () => setIsMuted((prev) => !prev);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black text-white font-inter">
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-black text-white font-inter">
       {/* Background Video */}
       <video
         ref={videoRef}
@@ -25,7 +25,7 @@ const LandingPage = () => {
         muted={isMuted}
         loop
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover object-[75%_center] md:object-center z-0"
       >
         <source src={`/assest/video/video.mp4`} type="video/mp4" />
       </video>
