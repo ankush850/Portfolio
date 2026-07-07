@@ -1,8 +1,8 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, PerspectiveCamera } from "@react-three/drei";
-import { useRef, useState } from "react";
+import { Float, PerspectiveCamera, OrbitControls } from "@react-three/drei";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { Volume2, VolumeX } from "lucide-react";
 
@@ -84,173 +84,118 @@ const stopDJ = () => {
 
 const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
     const groupRef = useRef<THREE.Group>(null);
-    const shockwaveRef = useRef<THREE.Mesh>(null);
-    const shockwaveRef2 = useRef<THREE.Mesh>(null); 
-    const mainMatRef = useRef<THREE.MeshStandardMaterial>(null);
-    const innerMatRef = useRef<THREE.MeshStandardMaterial>(null);
     const { invalidate } = useThree();
-    
     const [hovered, setHovered] = useState(false);
-
-    // Theme-aware base color
-    const getBaseColor = () => {
-        const theme = document.documentElement.getAttribute('data-theme');
-        return theme === 'light' ? new THREE.Color("#222222") : new THREE.Color("#ffffff");
-    };
-
+    const isBlasted = useRef(false);
+    const origOpacities = useRef<number[]>([]);
+    
     useFrame((state) => {
-        if (!animEnabled && !hovered) return;
-        if (!groupRef.current || !shockwaveRef.current || !shockwaveRef2.current || !mainMatRef.current || !innerMatRef.current) return;
+        if (!animEnabled) return;
+        if (!groupRef.current) return;
 
         const time = state.clock.elapsedTime;
+        const blastPhase = time > 15 && time < 25;
 
-        if (hovered && animEnabled) {
-            // --- 0. Disco Light Colors ---
-            // Cycles through vibrant HSL spectrum to mimic a disco club
-            const hue = (time * 0.5) % 1; 
-            const discoColor = new THREE.Color().setHSL(hue, 1, 0.5);
+        // Dispatch events and reset state exactly on transition
+        if (blastPhase && !isBlasted.current) {
+            isBlasted.current = true;
+            window.dispatchEvent(new CustomEvent('blast_change', { detail: true }));
             
-            mainMatRef.current.color.copy(discoColor);
-            mainMatRef.current.emissive.copy(discoColor);
-            innerMatRef.current.color.copy(discoColor);
-            (shockwaveRef.current.material as THREE.MeshStandardMaterial).color.copy(discoColor);
-            (shockwaveRef2.current.material as THREE.MeshStandardMaterial).color.copy(discoColor);
+            // Save original opacities if we haven't already
+            if (origOpacities.current.length === 0) {
+                groupRef.current.children.forEach((child) => {
+                    if (child.type === "Mesh") {
+                        const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+                        origOpacities.current.push(mat.opacity);
+                    }
+                });
+            }
+        } else if (!blastPhase && isBlasted.current && time >= 25) {
+            isBlasted.current = false;
+            window.dispatchEvent(new CustomEvent('blast_change', { detail: false }));
+            
+            // Reset scale instantly so it doesn't shrink back weirdly
+            groupRef.current.scale.set(0.1, 0.1, 0.1); 
+            
+            // Restore original opacities
+            groupRef.current.children.forEach((child, idx) => {
+                if (child.type === "Mesh") {
+                    const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+                    mat.opacity = origOpacities.current[idx] || 0.3;
+                }
+            });
+        }
 
-            // --- 1. Smooth Circling/"Shaking" (Orbital Wobble) ---
-            const shakeSpeed = 5;
-            const shakeAmp = 0.1; 
-            groupRef.current.position.x = Math.sin(time * shakeSpeed) * shakeAmp;
-            groupRef.current.position.y = Math.cos(time * shakeSpeed * 0.8) * shakeAmp;
-            groupRef.current.position.z = Math.sin(time * shakeSpeed * 1.2) * shakeAmp;
+        // Slow continuous ambient rotation
+        groupRef.current.rotation.y += 0.001;
+        groupRef.current.rotation.x += 0.0005;
 
-            // Fast continuous rotation when hovered
-            groupRef.current.rotation.y += 0.02;
-            groupRef.current.rotation.x += 0.01;
-
-            // --- 2. Expanding Beam (Ripple Effect) ---
-            const speed = 1.5;
-            const maxScale = 15; 
-
-            // Phase goes from 0 to 1 repeatedly
-            const phase1 = (time * speed) % 1;
-            const scale1 = 2 + phase1 * maxScale; 
-            const opacity1 = (1 - phase1) * 0.5; 
-
-            shockwaveRef.current.scale.setScalar(scale1);
-            (shockwaveRef.current.material as THREE.MeshStandardMaterial).opacity = opacity1;
-            shockwaveRef.current.rotation.z -= 0.01; 
-
-            // Loop 2 
-            const phase2 = ((time * speed) + 0.5) % 1;
-            const scale2 = 2 + phase2 * maxScale;
-            const opacity2 = (1 - phase2) * 0.3;
-
-            shockwaveRef2.current.scale.setScalar(scale2);
-            (shockwaveRef2.current.material as THREE.MeshStandardMaterial).opacity = opacity2;
-            shockwaveRef2.current.rotation.z += 0.01;
-
+        if (isBlasted.current) {
+            // Blast animation: Rapidly scale up to create an explosion effect
+            groupRef.current.scale.lerp(new THREE.Vector3(15, 15, 15), 0.15);
+            
+            // Fade out opacity during blast
+            groupRef.current.children.forEach((child) => {
+                if (child.type === "Mesh") {
+                    const mesh = child as THREE.Mesh;
+                    if (mesh.material) {
+                        const mat = mesh.material as THREE.MeshStandardMaterial;
+                        mat.opacity = THREE.MathUtils.lerp(mat.opacity, -0.1, 0.1);
+                    }
+                }
+            });
         } else {
-            // --- Reset Logic ---
-            const baseColor = getBaseColor();
-            mainMatRef.current.color.copy(baseColor);
-            mainMatRef.current.emissive.copy(baseColor);
-            innerMatRef.current.color.copy(baseColor);
-            (shockwaveRef.current.material as THREE.MeshStandardMaterial).color.copy(baseColor);
-            (shockwaveRef2.current.material as THREE.MeshStandardMaterial).color.copy(baseColor);
-
-            groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, 0, 0.1);
-            groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.1);
-            groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, 0, 0.1);
-            
-            // Slow continuous rotation when not hovered
-            groupRef.current.rotation.y += 0.002;
-            groupRef.current.rotation.x += 0.001;
-
-            // Hide Beams
-            shockwaveRef.current.scale.setScalar(0.01);
-            (shockwaveRef.current.material as THREE.MeshStandardMaterial).opacity = 0;
-            shockwaveRef2.current.scale.setScalar(0.01);
-            (shockwaveRef2.current.material as THREE.MeshStandardMaterial).opacity = 0;
+            // Smooth scaling on hover and resetting from tiny size
+            const targetScale = hovered ? 1.2 : 1.0;
+            groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
         }
 
         invalidate();
     });
 
     return (
-        <Float speed={animEnabled ? 2 : 0} rotationIntensity={animEnabled ? 0.5 : 0} floatIntensity={animEnabled ? 0.5 : 0}>
+        <Float speed={animEnabled ? 1 : 0} rotationIntensity={animEnabled ? 0.2 : 0} floatIntensity={animEnabled ? 0.2 : 0}>
             <group
+                ref={groupRef}
                 onPointerOver={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
-                    document.body.style.cursor = 'pointer'; 
-                    setHovered(true); 
+                    document.body.style.cursor = 'grab'; 
+                    setHovered(true);
                     startDJ(); 
                 }}
                 onPointerOut={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
                     document.body.style.cursor = 'auto'; 
-                    setHovered(false); 
+                    setHovered(false);
                     stopDJ(); 
                 }}
+                onPointerDown={() => { document.body.style.cursor = 'grabbing'; }}
+                onPointerUp={() => { document.body.style.cursor = 'grab'; }}
             >
-                {/* Main Object */}
-                <group ref={groupRef}>
-                    <group>
-                        <mesh scale={[2, 2, 1.5]}>
-                            <icosahedronGeometry args={[1, 1]} />
-                            <meshStandardMaterial
-                                ref={mainMatRef}
-                                color="#ffffff"
-                                emissive="#ffffff"
-                                emissiveIntensity={0.3}
-                                wireframe
-                                transparent
-                                opacity={0.6}
-                                roughness={0}
-                                metalness={1}
-                            />
-                        </mesh>
-                        <mesh>
-                            <icosahedronGeometry args={[1, 0]} />
-                            <meshStandardMaterial
-                                ref={innerMatRef}
-                                color="#ffffff"
-                                emissive="#ffffff"
-                                emissiveIntensity={0.3}
-                                transparent
-                                opacity={0.4}
-                            />
-                        </mesh>
-                    </group>
-                </group>
-
-                {/* Expanding Beam 1 */}
-                <mesh ref={shockwaveRef} scale={[0.1, 0.1, 0.1]}>
-                    <sphereGeometry args={[1, 32, 32]} />
+                {/* Main Wireframe Sphere */}
+                <mesh scale={[1.6, 1.6, 1.6]}>
+                    <sphereGeometry args={[1, 12, 12]} />
                     <meshStandardMaterial
                         color="#ffffff"
                         emissive="#ffffff"
-                        emissiveIntensity={1}
+                        emissiveIntensity={0.3}
+                        wireframe={true}
                         transparent
-                        opacity={0}
+                        opacity={0.3}
                         blending={THREE.AdditiveBlending}
-                        depthWrite={false}
-                        side={THREE.DoubleSide}
                     />
                 </mesh>
-
-                {/* Expanding Beam 2 (Wireframe Ring for texture) */}
-                <mesh ref={shockwaveRef2} scale={[0.1, 0.1, 0.1]}>
-                    <ringGeometry args={[0.9, 1, 64]} />
+                
+                {/* Inner faint core for depth */}
+                <mesh scale={[1.5, 1.5, 1.5]}>
+                    <sphereGeometry args={[1, 16, 16]} />
                     <meshStandardMaterial
                         color="#ffffff"
                         emissive="#ffffff"
-                        emissiveIntensity={1}
+                        emissiveIntensity={0.1}
                         transparent
-                        opacity={0}
+                        opacity={0.02}
                         wireframe={false}
-                        blending={THREE.AdditiveBlending}
-                        depthWrite={false}
-                        side={THREE.DoubleSide}
                     />
                 </mesh>
             </group>
@@ -261,11 +206,11 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
 const Scene = ({ animEnabled }: { animEnabled: boolean }) => {
     return (
         <>
-            {/* Lights and Stars moved to Global SpaceBackground for continuity */}
-            {/* <Stars ... /> */}
+            <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
             <HeroObjectFixed animEnabled={animEnabled} />
-
             <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={1} />
         </>
     );
 };
