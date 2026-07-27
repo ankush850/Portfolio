@@ -226,13 +226,25 @@ const SpaceScene = () => {
             
             <div className="absolute bottom-8 right-8 lg:bottom-12 lg:right-12 z-50 flex gap-4">
                 <button
+                    type="button"
                     onClick={() => {
                         const newMuted = !muted;
                         setMuted(newMuted);
                         isDJMuted = newMuted;
                         if (newMuted) stopDJ();
                     }}
-                    className="p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group"
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            const newMuted = !muted;
+                            setMuted(newMuted);
+                            isDJMuted = newMuted;
+                            if (newMuted) stopDJ();
+                        }
+                    }}
+                    className="p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group focus:outline-none focus:ring-2 focus:ring-white/50"
+                    aria-label={muted ? "Unmute DJ synthesizer audio" : "Mute DJ synthesizer audio"}
+                    aria-pressed={!muted}
                     title={muted ? "Unmute DJ" : "Mute DJ"}
                 >
                     {muted ? (

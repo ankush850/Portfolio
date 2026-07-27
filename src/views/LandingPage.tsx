@@ -45,9 +45,12 @@ const LandingPage = () => {
 
           {/* Mobile Hamburger */}
           <button 
-            className="md:hidden flex flex-col justify-center items-end space-y-1.5 w-10 h-10"
+            type="button"
+            className="md:hidden flex flex-col justify-center items-end space-y-1.5 w-10 h-10 focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
             onClick={() => setIsMenuOpen(true)}
-            aria-label="Open Menu"
+            aria-label="Open Navigation Menu"
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu-overlay"
           >
             <div className="w-6 h-0.5 bg-white"></div>
             <div className="w-6 h-0.5 bg-white"></div>
@@ -75,12 +78,13 @@ const LandingPage = () => {
             {/* CTA Row */}
             <div className="mt-8 lg:mt-10 flex flex-wrap items-center gap-4 sm:gap-6 opacity-0 animate-fade-up-delay-3">
               <button 
+                type="button"
                 onClick={() => {
                   setIsLoading(true);
                   // Slight delay so the loader can fade in before the heavy route transition
                   setTimeout(() => router.push('/main'), 300);
                 }}
-                className="group flex items-center gap-2 bg-black hover:bg-neutral-900 border border-white/20 px-5 sm:px-7 py-3 sm:py-4 text-[11px] sm:text-xs tracking-widest uppercase transition-colors"
+                className="group flex items-center gap-2 bg-black hover:bg-neutral-900 border border-white/20 px-5 sm:px-7 py-3 sm:py-4 text-[11px] sm:text-xs tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
               >
                 SEE MY WORK
                 <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -92,10 +96,11 @@ const LandingPage = () => {
         {/* Play/Mute Controls */}
         <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-10 lg:right-16 flex items-center gap-3 z-50">
           <button 
-
+            type="button"
             onClick={toggleMute}
-            className="p-3 sm:p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group"
-            aria-label={isMuted ? "Unmute Video" : "Mute Video"}
+            className="p-3 sm:p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label={isMuted ? "Unmute background video audio" : "Mute background video audio"}
+            aria-pressed={!isMuted}
           >
             {isMuted ? (
               <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
@@ -108,6 +113,10 @@ const LandingPage = () => {
 
       {/* Mobile Menu Overlay */}
       <div 
+        id="mobile-menu-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Navigation Menu"
         className={`fixed inset-0 z-50 bg-black/95 backdrop-blur-sm transition-all duration-500 flex flex-col ${
           isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
@@ -117,9 +126,10 @@ const LandingPage = () => {
             ANKUSH.DEV
           </div>
           <button 
+            type="button"
             onClick={() => setIsMenuOpen(false)}
-            className="p-2 -mr-2 text-white hover:text-white/70 transition-colors"
-            aria-label="Close Menu"
+            className="p-2 -mr-2 text-white hover:text-white/70 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 rounded"
+            aria-label="Close navigation menu"
           >
             <X className="w-8 h-8" />
           </button>
@@ -127,12 +137,13 @@ const LandingPage = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className={`transition-all duration-500 delay-200 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <button 
+              type="button"
               onClick={() => {
                 setIsMenuOpen(false);
                 setIsLoading(true);
                 setTimeout(() => router.push('/main'), 300);
               }}
-              className="flex items-center gap-2 border border-white/30 hover:border-white/60 px-8 py-4 text-sm tracking-widest uppercase hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 border border-white/30 hover:border-white/60 px-8 py-4 text-sm tracking-widest uppercase hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               ENTER PORTFOLIO
               <ArrowUpRight className="w-5 h-5" />
