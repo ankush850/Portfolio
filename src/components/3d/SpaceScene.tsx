@@ -52,8 +52,8 @@ const playDrum = (type: 'kick' | 'hat' | 'bass', time: number) => {
 
 const startDJ = () => {
     if (!audioCtx) {
-        const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext; // eslint-disable-line @typescript-eslint/no-explicit-any
-        if(Ctx) audioCtx = new Ctx();
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
     }
     if (audioCtx?.state === 'suspended') audioCtx.resume();
     
