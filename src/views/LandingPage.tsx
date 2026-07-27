@@ -27,7 +27,7 @@ const LandingPage = () => {
         playsInline
         className="absolute inset-0 w-full h-full object-cover object-[75%_center] md:object-center z-0"
       >
-        <source src={`/assest/video/video.mp4`} type="video/mp4" />
+        <source src="/assets/video/video.mp4" type="video/mp4" />
       </video>
 
       {/* Overlay to ensure text readability if needed (optional but good practice) */}
