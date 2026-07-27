@@ -87,7 +87,7 @@ const AwardSection = () => {
                       className="mt-8 rounded-lg overflow-hidden border border-white/10 relative group-hover:border-amber-500/30 transition-colors"
                     >
                       <img 
-                        src={`/assest/IMPULSE WINNER.jpg`} 
+                        src="/assets/IMPULSE WINNER.jpg" 
                         alt="Impulse 2026 Winner" 
                         className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       />
@@ -147,7 +147,7 @@ const AwardSection = () => {
                       className="mt-8 rounded-lg overflow-hidden border border-white/10 relative group-hover:border-amber-500/30 transition-colors"
                     >
                       <img 
-                        src={`/assest/winner codesangram.jpg`} 
+                        src="/assets/winner codesangram.jpg" 
                         alt="CodeSangram 2026 Winner" 
                         className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       />
@@ -207,7 +207,7 @@ const AwardSection = () => {
                       className="mt-8 rounded-lg overflow-hidden border border-white/10 relative group-hover:border-amber-500/30 transition-colors"
                     >
                       <img 
-                        src={`/assest/3SC.jpg`} 
+                        src="/assets/3SC.jpg" 
                         alt="3SC AI Hackathon 2026 Winner" 
                         className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       />
@@ -268,7 +268,7 @@ const AwardSection = () => {
                       className="mt-8 rounded-lg overflow-hidden border border-white/10 relative group-hover:border-amber-500/30 transition-colors"
                     >
                       <img 
-                        src={`/assest/finalist.jpg`} 
+                        src="/assets/finalist.jpg" 
                         alt="Hackathon Finalist Award" 
                         className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       />
