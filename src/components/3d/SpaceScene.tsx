@@ -244,6 +244,15 @@ const Scene = ({ animEnabled }: { animEnabled: boolean }) => {
 const SpaceScene = () => {
     const [muted, setMuted] = useState(isDJMuted);
 
+    useEffect(() => {
+        return () => {
+            stopDJ();
+            if (audioCtx && audioCtx.state !== 'closed') {
+                audioCtx.suspend();
+            }
+        };
+    }, []);
+
     return (
         <div className="absolute inset-0 z-0">
             <Canvas gl={{ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: false }} dpr={[1, 1.25]} frameloop="demand">
