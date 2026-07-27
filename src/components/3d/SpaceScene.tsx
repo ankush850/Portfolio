@@ -113,8 +113,9 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
         if (!animEnabled) return;
         if (!groupRef.current) return;
 
-        const time = state.clock.elapsedTime;
-        const blastPhase = time > 15 && time < 25;
+        // Repeat blast phase animation every 60 seconds
+        const cycleTime = state.clock.elapsedTime % 60;
+        const blastPhase = cycleTime > 15 && cycleTime < 25;
 
         // Dispatch events and reset state exactly on transition
         if (blastPhase && !isBlasted.current) {
@@ -130,7 +131,7 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
                     }
                 });
             }
-        } else if (!blastPhase && isBlasted.current && time >= 25) {
+        } else if (!blastPhase && isBlasted.current) {
             isBlasted.current = false;
             window.dispatchEvent(new CustomEvent('blast_change', { detail: false }));
             
