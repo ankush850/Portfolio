@@ -86,8 +86,28 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
     const groupRef = useRef<THREE.Group>(null);
     const { invalidate } = useThree();
     const [hovered, setHovered] = useState(false);
+    const [isGrabbing, setIsGrabbing] = useState(false);
     const isBlasted = useRef(false);
     const origOpacities = useRef<number[]>([]);
+
+    useEffect(() => {
+        if (!animEnabled || window.innerWidth <= 1024) {
+            document.body.style.cursor = 'auto';
+            return;
+        }
+
+        if (isGrabbing) {
+            document.body.style.cursor = 'grabbing';
+        } else if (hovered) {
+            document.body.style.cursor = 'grab';
+        } else {
+            document.body.style.cursor = 'auto';
+        }
+
+        return () => {
+            document.body.style.cursor = 'auto';
+        };
+    }, [hovered, isGrabbing, animEnabled]);
     
     useFrame((state) => {
         if (!animEnabled) return;
@@ -159,18 +179,23 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
                 ref={groupRef}
                 onPointerOver={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
-                    document.body.style.cursor = 'grab'; 
                     setHovered(true);
                     startDJ(); 
                 }}
                 onPointerOut={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
-                    document.body.style.cursor = 'auto'; 
                     setHovered(false);
+                    setIsGrabbing(false);
                     stopDJ(); 
                 }}
-                onPointerDown={() => { document.body.style.cursor = 'grabbing'; }}
-                onPointerUp={() => { document.body.style.cursor = 'grab'; }}
+                onPointerDown={() => { 
+                    if (window.innerWidth <= 1024 || !animEnabled) return;
+                    setIsGrabbing(true); 
+                }}
+                onPointerUp={() => { 
+                    if (window.innerWidth <= 1024 || !animEnabled) return;
+                    setIsGrabbing(false); 
+                }}
             >
                 {/* Main Wireframe Sphere */}
                 <mesh scale={[1.6, 1.6, 1.6]}>
