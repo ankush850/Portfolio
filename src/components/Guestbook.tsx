@@ -32,10 +32,16 @@ const INITIAL_MESSAGES: GuestbookEntry[] = [
   }
 ];
 
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 // Global audio context for performance and browser limits
 let audioCtx: AudioContext | null = null;
 const getAudioCtx = () => {
-  const Ctx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
   if (!Ctx) return null;
   if (!audioCtx) audioCtx = new Ctx();
   if (audioCtx.state === 'suspended') audioCtx.resume();
