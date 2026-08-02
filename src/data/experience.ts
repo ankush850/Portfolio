@@ -1,4 +1,4 @@
-import { Building2, GraduationCap, type LucideIcon } from "lucide-react";
+import { GraduationCap, type LucideIcon } from "lucide-react";
 
 export interface Experience {
   company: string;
@@ -65,35 +65,4 @@ export const experiences: Experience[] = [
       "Git"
     ],
   },
-  {
-    company: "QuickHyre",
-    role: "Python Developer Intern",
-    period: "2025",
-    type: "internship",
-    icon: GraduationCap,
-    color: "accent",
-    achievements: [
-      "Developed backend applications and automation scripts using Python",
-      "Built and integrated REST APIs for web applications",
-      "Collaborated with the development team on real-world software projects",
-      "Debugged, tested, and optimized Python code for improved performance",
-      "Worked with version control and followed industry-standard development practices"
-    ],
-    technologies: ["Python", "FastAPI", "Flask", "REST API"],
-  },
-  {
-    company: "Vivid Nexus",
-    role: "Intern",
-    period: "2025",
-    type: "internship",
-    icon: GraduationCap,
-    color: "accent",
-    achievements: [
-      "Worked across Web Development",
-      "Collaborated on intern-level projects",
-      "Hands-on experience with real-world systems",
-    ],
-    technologies: ["Express.js", "React.js"],
-  },
-
 ];

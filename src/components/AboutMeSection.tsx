@@ -87,8 +87,19 @@ const PERSONAS: Persona[] = [
     },
 ];
 
+const getYearsActive = () => {
+    const startDate = new Date("2023-07-13");
+    const today = new Date();
+    let years = today.getFullYear() - startDate.getFullYear();
+    const m = today.getMonth() - startDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < startDate.getDate())) {
+        years--;
+    }
+    return `${years}+`;
+};
+
 const STATS: Stat[] = [
-    { value: "2+", label: "YEARS_ACTIVE", icon: TrendingUp },
+    { value: getYearsActive(), label: "YEARS_ACTIVE", icon: TrendingUp },
     { value: "10+", label: "DEPLOYED_NODES", icon: Globe },
     { value: "5+", label: "SATISFIED_CLIENTS", icon: Award },
 ];
