@@ -9,6 +9,7 @@ import SpaceBackground from "@/components/3d/SpaceBackground";
 import { LazySection } from "@/components/ui/LazySection";
 
 import AIAssistantWidget from "@/components/ui/AIAssistantWidget";
+import CommandTerminal from "@/components/ui/CommandTerminal";
 
 // Lazy load below-the-fold heavy components
 const Services = lazy(() => import("@/components/Services"));
@@ -40,6 +41,9 @@ const Index = () => {
 
       {/* Global AI Assistant Floating Widget */}
       <AIAssistantWidget />
+
+      {/* Global Interactive Developer Terminal (Ctrl+K or /) */}
+      <CommandTerminal />
 
       <div className="min-h-screen bg-transparent text-white selection:bg-white/20 relative z-10">
         <main id="main-content">
