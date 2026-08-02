@@ -1,90 +1,147 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, PerspectiveCamera, OrbitControls } from "@react-three/drei";
 import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
-import { Volume2, VolumeX } from "lucide-react";
 
 export const isDJMuted = true;
 
-// --- Procedural DJ Techno Loop Generator (Zero Copyright!) ---
-let audioCtx: AudioContext | null = null;
-let djInterval: NodeJS.Timeout | null = null;
-let noteStep = 0;
+export type ModelType = "sphere" | "torus_knot" | "quantum_core" | "hypercube";
 
-const playDrum = (type: 'kick' | 'hat' | 'bass', time: number) => {
-    if (!audioCtx || isDJMuted) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = type === 'bass' ? 800 : 8000;
-    
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
+const MODEL_OPTIONS: { id: ModelType; label: string }[] = [
+    { id: "sphere", label: "SPHERE" },
+    { id: "torus_knot", label: "TORUS_KNOT" },
+    { id: "quantum_core", label: "QUANTUM_CORE" },
+    { id: "hypercube", label: "HYPERCUBE" },
+];
 
-    if (type === 'kick') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, time);
-        osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
-        gain.gain.setValueAtTime(1, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
-    } else if (type === 'hat') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(8000, time);
-        gain.gain.setValueAtTime(0.05, time); 
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05); 
-    } else if (type === 'bass') {
-        osc.type = 'sawtooth';
-        // Minor pentatonic bassline for that classic acid house feel
-        const notes = [65.41, 73.42, 77.78, 98.00, 65.41]; 
-        osc.frequency.setValueAtTime(notes[Math.floor(Math.random() * notes.length)], time);
-        gain.gain.setValueAtTime(0.3, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
-    }
-    
-    osc.start(time);
-    osc.stop(time + 0.5);
-};
+const SphereModel = () => (
+    <>
+        <mesh scale={[1.2, 1.2, 1.2]}>
+            <sphereGeometry args={[1, 16, 16]} />
+            <meshStandardMaterial
+                color="#ffffff"
+                emissive="#ffffff"
+                emissiveIntensity={0.4}
+                wireframe={true}
+                transparent
+                opacity={0.5}
+                blending={THREE.AdditiveBlending}
+            />
+        </mesh>
+        <mesh scale={[1.1, 1.1, 1.1]}>
+            <sphereGeometry args={[1, 20, 20]} />
+            <meshStandardMaterial
+                color="#4ade80"
+                emissive="#10b981"
+                emissiveIntensity={0.2}
+                transparent
+                opacity={0.08}
+                wireframe={false}
+            />
+        </mesh>
+    </>
+);
 
-const startDJ = () => {
-    if (!audioCtx) {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) audioCtx = new Ctx();
-    }
-    if (audioCtx?.state === 'suspended') audioCtx.resume();
-    
-    if (djInterval) return;
-    
-    noteStep = 0;
-    // 125 BPM = 120ms per 16th note
-    djInterval = setInterval(() => {
-        if (!audioCtx) return;
-        const time = audioCtx.currentTime + 0.05;
-        
-        if (noteStep % 4 === 0) playDrum('kick', time);
-        if (noteStep % 4 === 2) playDrum('hat', time);
-        if (noteStep % 16 === 0 || noteStep % 16 === 3 || noteStep % 16 === 7 || noteStep % 16 === 10 || noteStep % 16 === 14) {
-            playDrum('bass', time);
+const TorusKnotModel = () => (
+    <>
+        <mesh scale={[0.95, 0.95, 0.95]}>
+            <torusKnotGeometry args={[1, 0.3, 120, 16]} />
+            <meshStandardMaterial
+                color="#ffffff"
+                emissive="#ffffff"
+                emissiveIntensity={0.4}
+                wireframe={true}
+                transparent
+                opacity={0.5}
+                blending={THREE.AdditiveBlending}
+            />
+        </mesh>
+        <mesh scale={[0.9, 0.9, 0.9]}>
+            <torusKnotGeometry args={[1, 0.28, 100, 12]} />
+            <meshStandardMaterial
+                color="#4ade80"
+                emissive="#10b981"
+                emissiveIntensity={0.2}
+                transparent
+                opacity={0.08}
+                wireframe={false}
+            />
+        </mesh>
+    </>
+);
+
+const QuantumCoreModel = () => {
+    const ring1Ref = useRef<THREE.Mesh>(null);
+    const ring2Ref = useRef<THREE.Mesh>(null);
+    useFrame(() => {
+        if (ring1Ref.current) {
+            ring1Ref.current.rotation.z += 0.008;
+            ring1Ref.current.rotation.x += 0.004;
         }
-        
-        noteStep++;
-    }, 120);
+        if (ring2Ref.current) {
+            ring2Ref.current.rotation.z -= 0.01;
+            ring2Ref.current.rotation.y += 0.005;
+        }
+    });
+    return (
+        <>
+            <mesh scale={[1.0, 1.0, 1.0]}>
+                <icosahedronGeometry args={[1, 2]} />
+                <meshStandardMaterial
+                    color="#ffffff"
+                    emissive="#ffffff"
+                    emissiveIntensity={0.4}
+                    wireframe={true}
+                    transparent
+                    opacity={0.5}
+                    blending={THREE.AdditiveBlending}
+                />
+            </mesh>
+            <mesh ref={ring1Ref} scale={[1.5, 1.5, 1.5]}>
+                <torusGeometry args={[1, 0.025, 16, 100]} />
+                <meshStandardMaterial color="#4ade80" emissive="#10b981" emissiveIntensity={0.9} />
+            </mesh>
+            <mesh ref={ring2Ref} scale={[1.75, 1.75, 1.75]} rotation={[Math.PI / 3, 0, 0]}>
+                <torusGeometry args={[1, 0.015, 16, 100]} />
+                <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={0.8} />
+            </mesh>
+        </>
+    );
 };
 
-const stopDJ = () => {
-    if (djInterval) {
-        clearInterval(djInterval);
-        djInterval = null;
-    }
-};
+const HypercubeModel = () => (
+    <>
+        <mesh scale={[1.0, 1.0, 1.0]}>
+            <boxGeometry args={[1.5, 1.5, 1.5]} />
+            <meshStandardMaterial
+                color="#ffffff"
+                emissive="#ffffff"
+                emissiveIntensity={0.4}
+                wireframe={true}
+                transparent
+                opacity={0.5}
+                blending={THREE.AdditiveBlending}
+            />
+        </mesh>
+        <mesh scale={[0.7, 0.7, 0.7]} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
+            <octahedronGeometry args={[1]} />
+            <meshStandardMaterial
+                color="#ffffff"
+                emissive="#ffffff"
+                emissiveIntensity={0.3}
+                wireframe={true}
+                transparent
+                opacity={0.35}
+                blending={THREE.AdditiveBlending}
+            />
+        </mesh>
+    </>
+);
 
-const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
+const HeroObjectFixed = ({ animEnabled, activeModel }: { animEnabled: boolean; activeModel: ModelType }) => {
     const groupRef = useRef<THREE.Group>(null);
-    const { invalidate } = useThree();
     const [hovered, setHovered] = useState(false);
     const [isGrabbing, setIsGrabbing] = useState(false);
 
@@ -115,8 +172,8 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
         groupRef.current.rotation.y += 0.003;
         groupRef.current.rotation.x += 0.001;
 
-        // Smooth scaling on hover
-        const targetScale = hovered ? 1.2 : 1.0;
+        // Smooth scaling on hover (compact base scale)
+        const targetScale = hovered ? 0.95 : 0.8;
         groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     });
 
@@ -127,13 +184,11 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
                 onPointerOver={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
                     setHovered(true);
-                    startDJ(); 
                 }}
                 onPointerOut={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
                     setHovered(false);
                     setIsGrabbing(false);
-                    stopDJ(); 
                 }}
                 onPointerDown={() => { 
                     if (window.innerWidth <= 1024 || !animEnabled) return;
@@ -144,68 +199,65 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
                     setIsGrabbing(false); 
                 }}
             >
-                {/* Main Wireframe Sphere */}
-                <mesh scale={[1.6, 1.6, 1.6]}>
-                    <sphereGeometry args={[1, 16, 16]} />
-                    <meshStandardMaterial
-                        color="#ffffff"
-                        emissive="#ffffff"
-                        emissiveIntensity={0.4}
-                        wireframe={true}
-                        transparent
-                        opacity={0.5}
-                        blending={THREE.AdditiveBlending}
-                    />
-                </mesh>
-                
-                {/* Inner faint core for depth */}
-                <mesh scale={[1.5, 1.5, 1.5]}>
-                    <sphereGeometry args={[1, 20, 20]} />
-                    <meshStandardMaterial
-                        color="#4ade80"
-                        emissive="#10b981"
-                        emissiveIntensity={0.2}
-                        transparent
-                        opacity={0.08}
-                        wireframe={false}
-                    />
-                </mesh>
+                {activeModel === "sphere" && <SphereModel />}
+                {activeModel === "torus_knot" && <TorusKnotModel />}
+                {activeModel === "quantum_core" && <QuantumCoreModel />}
+                {activeModel === "hypercube" && <HypercubeModel />}
             </group>
         </Float>
     );
-}
+};
 
-const Scene = ({ animEnabled }: { animEnabled: boolean }) => {
+const Scene = ({ animEnabled, activeModel }: { animEnabled: boolean; activeModel: ModelType }) => {
     return (
         <>
             <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
-            <HeroObjectFixed animEnabled={animEnabled} />
+            <HeroObjectFixed key={activeModel} animEnabled={animEnabled} activeModel={activeModel} />
             <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
             <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
+            <pointLight position={[10, 10, 10]} intensity={1.5} color="#10b981" />
+            <pointLight position={[-10, -10, -10]} intensity={1.0} color="#3b82f6" />
         </>
     );
 };
 
 const SpaceScene = () => {
-    const [muted, setMuted] = useState(isDJMuted);
-
-    useEffect(() => {
-        return () => {
-            stopDJ();
-            if (audioCtx && audioCtx.state !== 'closed') {
-                audioCtx.suspend();
-            }
-        };
-    }, []);
+    const [activeModel, setActiveModel] = useState<ModelType>("sphere");
 
     return (
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-auto">
+            {/* 3D Model Switcher Controls Bar - Shifted right (left-[56%]) to align under 3D model */}
+            <div className="absolute bottom-10 left-[56%] -translate-x-1/2 z-30 hidden md:flex items-center gap-1.5 p-1.5 bg-black/85 border border-emerald-500/40 rounded-full backdrop-blur-xl font-mono text-[10px] shadow-[0_0_25px_rgba(16,185,129,0.25)] pointer-events-auto select-none">
+                <span className="px-2.5 py-1 text-emerald-400 font-bold uppercase tracking-widest border-r border-white/10 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    3D_CORE:
+                </span>
+                {MODEL_OPTIONS.map((m) => (
+                    <button
+                        key={m.id}
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveModel(m.id);
+                        }}
+                        className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
+                            activeModel === m.id
+                                ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/60 font-bold shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                                : "text-white/50 hover:text-white hover:bg-white/10"
+                        }`}
+                    >
+                        {m.label}
+                    </button>
+                ))}
+            </div>
+
             <Canvas gl={{ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: false }} dpr={[1, 1.25]} frameloop="always">
-                <Scene animEnabled={true} />
+                <Scene animEnabled={true} activeModel={activeModel} />
             </Canvas>
         </div>
     );
 };
 
 export default SpaceScene;
+
+
