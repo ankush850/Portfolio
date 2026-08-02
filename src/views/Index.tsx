@@ -8,6 +8,8 @@ import SystemStatus from "@/components/SystemStatus";
 import SpaceBackground from "@/components/3d/SpaceBackground";
 import { LazySection } from "@/components/ui/LazySection";
 
+import AIAssistantWidget from "@/components/ui/AIAssistantWidget";
+
 // Lazy load below-the-fold heavy components
 const Services = lazy(() => import("@/components/Services"));
 const AboutMeSection = lazy(() => import("@/components/AboutMeSection"));
@@ -16,12 +18,12 @@ const ExperienceTimeline = lazy(() => import("@/components/ExperienceTimeline"))
 const PhilosophySection = lazy(() => import("@/components/PhilosophySection"));
 const SkillsSection = lazy(() => import("@/components/SkillsSection"));
 const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
+const TechStackRadar = lazy(() => import("@/components/TechStackRadar"));
 
 const ArchitectureGallery = lazy(() => import("@/components/ArchitectureGallery"));
 const AwardSection = lazy(() => import("@/components/AwardSection"));
 const EducationSection = lazy(() => import("@/components/EducationSection"));
 const ContactSection = lazy(() => import("@/components/ContactSection"));
-const Guestbook = lazy(() => import("@/components/Guestbook"));
 
 const Index = () => {
   return (
@@ -35,6 +37,9 @@ const Index = () => {
       <SpaceBackground />
       {/* Global Fixed Grid Pattern covering the entire viewport continuously */}
       <div className="fixed inset-0 grid-pattern opacity-[0.03] z-0 pointer-events-none" />
+
+      {/* Global AI Assistant Floating Widget */}
+      <AIAssistantWidget />
 
       <div className="min-h-screen bg-transparent text-white selection:bg-white/20 relative z-10">
         <main id="main-content">
@@ -65,11 +70,13 @@ const Index = () => {
               <SkillsSection />
             </LazySection>
 
+            <LazySection sectionId="tech-radar" minHeight="800px">
+              <TechStackRadar />
+            </LazySection>
+
             <LazySection sectionId="projects" minHeight="1000px">
               <ProjectsSection />
             </LazySection>
-
-
 
             <LazySection minHeight="700px">
               <ArchitectureGallery />
@@ -81,10 +88,6 @@ const Index = () => {
 
             <LazySection sectionId="education" minHeight="700px">
               <EducationSection />
-            </LazySection>
-
-            <LazySection sectionId="guestbook" minHeight="800px">
-              <Guestbook />
             </LazySection>
 
             <LazySection sectionId="contact" minHeight="800px">
