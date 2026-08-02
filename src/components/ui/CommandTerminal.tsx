@@ -28,7 +28,7 @@ export default function CommandTerminal() {
     const inputRef = useRef<HTMLInputElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    // Keyboard shortcut listener (Ctrl + K or /)
+    // Keyboard shortcut listener (Ctrl + K or /) and custom event listener
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey && e.key.toLowerCase() === "k") || (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA")) {
@@ -39,8 +39,14 @@ export default function CommandTerminal() {
             }
         };
 
+        const handleOpenEvent = () => setIsOpen(true);
+
         window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
+        window.addEventListener("open-command-terminal", handleOpenEvent);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("open-command-terminal", handleOpenEvent);
+        };
     }, [isOpen]);
 
     useEffect(() => {
@@ -171,16 +177,6 @@ export default function CommandTerminal() {
 
     return (
         <>
-            {/* Global Trigger Button in corner or keyboard hint */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 left-6 z-40 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 border border-emerald-500/30 text-emerald-400 hover:text-white hover:border-emerald-400 text-xs font-mono shadow-lg backdrop-blur-md transition-all group"
-            >
-                <Terminal className="w-3.5 h-3.5 group-hover:scale-110 transition-transform text-emerald-400" />
-                <span>TERMINAL</span>
-                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] text-white/60">Ctrl+K</span>
-            </button>
-
             {/* Terminal Modal Overlay */}
             <AnimatePresence>
                 {isOpen && (

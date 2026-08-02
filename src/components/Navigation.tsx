@@ -3,7 +3,7 @@
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { useSmoothScroll } from "./ui/SmoothScroll";
 import { useState, useEffect, useRef } from "react";
-import { Menu, Download } from "lucide-react";
+import { Menu, Download, Terminal } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -284,15 +284,17 @@ const Navigation = () => {
             </MagneticButton>
 
             <MagneticButton>
-              <a
-                href="#contact"
-                onClick={(e) => handleScroll(e, "#contact")}
-                className="hidden md:flex items-center gap-2 text-[11px] font-mono tracking-widest uppercase text-white/70 hover:text-white transition-all border border-white/10 hover:border-emerald-500/30 px-5 py-2 rounded-full hover:bg-emerald-500/5 group relative overflow-hidden"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-command-terminal"))}
+                className="hidden md:flex items-center gap-2 text-[11px] font-mono tracking-widest uppercase text-emerald-400 hover:text-white transition-all border border-emerald-500/30 hover:border-emerald-400 px-4 py-1.5 rounded-full hover:bg-emerald-500/10 group relative overflow-hidden shadow-[0_0_15px_rgba(16,185,129,0.15)]"
               >
                 {/* Shimmer sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
-                <span className="relative z-10">[ GET_IN_TOUCH ]</span>
-              </a>
+                <Terminal className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="relative z-10 font-bold">TERMINAL</span>
+                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] text-white/60">Ctrl+K</span>
+              </button>
             </MagneticButton>
           </div>
         </div>
