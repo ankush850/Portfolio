@@ -7,11 +7,11 @@ export function DynamicTitle() {
 
   useEffect(() => {
     // Save the original title once on mount
-    setOriginalTitle(document.title);
+    setOriginalTitle(document.title || "Ankush Singh Rawat | Software Developer");
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        document.title = "SYSTEM IDLE";
+        document.title = "Ankush Singh Rawat | Software Developer";
       } else {
         document.title = originalTitle || "Ankush Singh Rawat | Software Developer";
       }

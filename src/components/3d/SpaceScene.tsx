@@ -163,7 +163,7 @@ const HeroObjectFixed = ({ animEnabled, activeModel }: { animEnabled: boolean; a
             document.body.style.cursor = 'auto';
         };
     }, [hovered, isGrabbing, animEnabled]);
-    
+
     useFrame(() => {
         if (!animEnabled) return;
         if (!groupRef.current) return;
@@ -181,22 +181,22 @@ const HeroObjectFixed = ({ animEnabled, activeModel }: { animEnabled: boolean; a
         <Float speed={animEnabled ? 1.5 : 0} rotationIntensity={animEnabled ? 0.3 : 0} floatIntensity={animEnabled ? 0.3 : 0}>
             <group
                 ref={groupRef}
-                onPointerOver={() => { 
+                onPointerOver={() => {
                     if (window.innerWidth <= 1024 || !animEnabled) return;
                     setHovered(true);
                 }}
-                onPointerOut={() => { 
+                onPointerOut={() => {
                     if (window.innerWidth <= 1024 || !animEnabled) return;
                     setHovered(false);
                     setIsGrabbing(false);
                 }}
-                onPointerDown={() => { 
+                onPointerDown={() => {
                     if (window.innerWidth <= 1024 || !animEnabled) return;
-                    setIsGrabbing(true); 
+                    setIsGrabbing(true);
                 }}
-                onPointerUp={() => { 
+                onPointerUp={() => {
                     if (window.innerWidth <= 1024 || !animEnabled) return;
-                    setIsGrabbing(false); 
+                    setIsGrabbing(false);
                 }}
             >
                 {activeModel === "sphere" && <SphereModel />}
@@ -240,11 +240,10 @@ const SpaceScene = () => {
                             e.stopPropagation();
                             setActiveModel(m.id);
                         }}
-                        className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
-                            activeModel === m.id
-                                ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/60 font-bold shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-                                : "text-white/50 hover:text-white hover:bg-white/10"
-                        }`}
+                        className={`px-3 py-1 rounded-full transition-all cursor-pointer ${activeModel === m.id
+                            ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/60 font-bold shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                            : "text-white/50 hover:text-white hover:bg-white/10"
+                            }`}
                     >
                         {m.label}
                     </button>
