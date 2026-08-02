@@ -6,7 +6,7 @@ import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { Volume2, VolumeX } from "lucide-react";
 
-export let isDJMuted = true;
+export const isDJMuted = true;
 
 // --- Procedural DJ Techno Loop Generator (Zero Copyright!) ---
 let audioCtx: AudioContext | null = null;
@@ -87,8 +87,6 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
     const { invalidate } = useThree();
     const [hovered, setHovered] = useState(false);
     const [isGrabbing, setIsGrabbing] = useState(false);
-    const isBlasted = useRef(false);
-    const origOpacities = useRef<number[]>([]);
 
     useEffect(() => {
         if (!animEnabled || window.innerWidth <= 1024) {
@@ -109,73 +107,21 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
         };
     }, [hovered, isGrabbing, animEnabled]);
     
-    useFrame((state) => {
+    useFrame(() => {
         if (!animEnabled) return;
         if (!groupRef.current) return;
 
-        // Repeat blast phase animation every 60 seconds
-        const cycleTime = state.clock.elapsedTime % 60;
-        const blastPhase = cycleTime > 15 && cycleTime < 25;
+        // Continuous smooth ambient rotation
+        groupRef.current.rotation.y += 0.003;
+        groupRef.current.rotation.x += 0.001;
 
-        // Dispatch events and reset state exactly on transition
-        if (blastPhase && !isBlasted.current) {
-            isBlasted.current = true;
-            window.dispatchEvent(new CustomEvent('blast_change', { detail: true }));
-            
-            // Save original opacities if we haven't already
-            if (origOpacities.current.length === 0) {
-                groupRef.current.children.forEach((child) => {
-                    if (child.type === "Mesh") {
-                        const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-                        origOpacities.current.push(mat.opacity);
-                    }
-                });
-            }
-        } else if (!blastPhase && isBlasted.current) {
-            isBlasted.current = false;
-            window.dispatchEvent(new CustomEvent('blast_change', { detail: false }));
-            
-            // Reset scale instantly so it doesn't shrink back weirdly
-            groupRef.current.scale.set(0.1, 0.1, 0.1); 
-            
-            // Restore original opacities
-            groupRef.current.children.forEach((child, idx) => {
-                if (child.type === "Mesh") {
-                    const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-                    mat.opacity = origOpacities.current[idx] || 0.3;
-                }
-            });
-        }
-
-        // Slow continuous ambient rotation
-        groupRef.current.rotation.y += 0.001;
-        groupRef.current.rotation.x += 0.0005;
-
-        if (isBlasted.current) {
-            // Blast animation: Rapidly scale up to create an explosion effect
-            groupRef.current.scale.lerp(new THREE.Vector3(15, 15, 15), 0.15);
-            
-            // Fade out opacity during blast
-            groupRef.current.children.forEach((child) => {
-                if (child.type === "Mesh") {
-                    const mesh = child as THREE.Mesh;
-                    if (mesh.material) {
-                        const mat = mesh.material as THREE.MeshStandardMaterial;
-                        mat.opacity = THREE.MathUtils.lerp(mat.opacity, -0.1, 0.1);
-                    }
-                }
-            });
-        } else {
-            // Smooth scaling on hover and resetting from tiny size
-            const targetScale = hovered ? 1.2 : 1.0;
-            groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-        }
-
-        invalidate();
+        // Smooth scaling on hover
+        const targetScale = hovered ? 1.2 : 1.0;
+        groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     });
 
     return (
-        <Float speed={animEnabled ? 1 : 0} rotationIntensity={animEnabled ? 0.2 : 0} floatIntensity={animEnabled ? 0.2 : 0}>
+        <Float speed={animEnabled ? 1.5 : 0} rotationIntensity={animEnabled ? 0.3 : 0} floatIntensity={animEnabled ? 0.3 : 0}>
             <group
                 ref={groupRef}
                 onPointerOver={() => { 
@@ -200,27 +146,27 @@ const HeroObjectFixed = ({ animEnabled }: { animEnabled: boolean }) => {
             >
                 {/* Main Wireframe Sphere */}
                 <mesh scale={[1.6, 1.6, 1.6]}>
-                    <sphereGeometry args={[1, 12, 12]} />
+                    <sphereGeometry args={[1, 16, 16]} />
                     <meshStandardMaterial
                         color="#ffffff"
                         emissive="#ffffff"
-                        emissiveIntensity={0.3}
+                        emissiveIntensity={0.4}
                         wireframe={true}
                         transparent
-                        opacity={0.3}
+                        opacity={0.5}
                         blending={THREE.AdditiveBlending}
                     />
                 </mesh>
                 
                 {/* Inner faint core for depth */}
                 <mesh scale={[1.5, 1.5, 1.5]}>
-                    <sphereGeometry args={[1, 16, 16]} />
+                    <sphereGeometry args={[1, 20, 20]} />
                     <meshStandardMaterial
-                        color="#ffffff"
-                        emissive="#ffffff"
-                        emissiveIntensity={0.1}
+                        color="#4ade80"
+                        emissive="#10b981"
+                        emissiveIntensity={0.2}
                         transparent
-                        opacity={0.02}
+                        opacity={0.08}
                         wireframe={false}
                     />
                 </mesh>
@@ -255,40 +201,9 @@ const SpaceScene = () => {
 
     return (
         <div className="absolute inset-0 z-0">
-            <Canvas gl={{ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: false }} dpr={[1, 1.25]} frameloop="demand">
+            <Canvas gl={{ antialias: false, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: false }} dpr={[1, 1.25]} frameloop="always">
                 <Scene animEnabled={true} />
             </Canvas>
-            
-            <div className="absolute bottom-8 right-8 lg:bottom-12 lg:right-12 z-50 flex gap-4">
-                <button
-                    type="button"
-                    onClick={() => {
-                        const newMuted = !muted;
-                        setMuted(newMuted);
-                        isDJMuted = newMuted;
-                        if (newMuted) stopDJ();
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            const newMuted = !muted;
-                            setMuted(newMuted);
-                            isDJMuted = newMuted;
-                            if (newMuted) stopDJ();
-                        }
-                    }}
-                    className="p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group focus:outline-none focus:ring-2 focus:ring-white/50"
-                    aria-label={muted ? "Unmute DJ synthesizer audio" : "Mute DJ synthesizer audio"}
-                    aria-pressed={!muted}
-                    title={muted ? "Unmute DJ" : "Mute DJ"}
-                >
-                    {muted ? (
-                        <VolumeX className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    ) : (
-                        <Volume2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    )}
-                </button>
-            </div>
         </div>
     );
 };

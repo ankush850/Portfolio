@@ -92,23 +92,6 @@ const LandingPage = () => {
             </div>
           </div>
         </main>
-
-        {/* Play/Mute Controls */}
-        <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-10 lg:right-16 flex items-center gap-3 z-50">
-          <button 
-            type="button"
-            onClick={toggleMute}
-            className="p-3 sm:p-4 rounded-full bg-black/40 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all group focus:outline-none focus:ring-2 focus:ring-white/50"
-            aria-label={isMuted ? "Unmute background video audio" : "Mute background video audio"}
-            aria-pressed={!isMuted}
-          >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-            ) : (
-              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
