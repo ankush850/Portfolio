@@ -4,27 +4,14 @@ import { useRef } from "react";
 import { useSmoothScroll } from "./ui/SmoothScroll";
 import ExperienceTimer from "./ui/ExperienceTimer";
 
-import { lazy, Suspense } from "react";
-import { useLowEndDevice } from "@/hooks/useLowEndDevice";
-import { useMobile } from "@/hooks/useMobile";
-import { useIdleMount } from "@/hooks/useIdleMount";
-
 import DecryptText from "@/components/ui/DecryptText";
-
 import { useLoading } from "@/context/LoadingContext";
 import MagneticButton from "@/components/ui/MagneticButton";
 
-const SpaceScene = lazy(() => import("@/components/3d/SpaceScene"));
-
 const Hero = () => {
   const { isLoading } = useLoading();
-  const isMobile = useMobile();
-  const isLowEnd = useLowEndDevice();
   const { lenis } = useSmoothScroll();
   const ref = useRef<HTMLElement>(null);
-
-  const shouldRenderDesktopScene = isLowEnd === false && !isMobile;
-  const showSpaceScene = shouldRenderDesktopScene && !isLoading;
 
   // Dynamic Experience Calculation (Start: July 2021)
   const startDate = new Date("2023-07-13");
@@ -47,26 +34,10 @@ const Hero = () => {
 
   return (
     <section ref={ref} className="relative min-h-screen flex items-center justify-center px-6 md:px-12 selection:bg-white/20 overflow-hidden">
-      {/* 3D Space Background (Adaptive) */}
-      {shouldRenderDesktopScene ? (
-        showSpaceScene ? (
-          <Suspense fallback={
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black z-0">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black opacity-50" />
-            </div>
-          }>
-            <SpaceScene />
-          </Suspense>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black z-0">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black opacity-50" />
-          </div>
-        )
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black z-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black opacity-50" />
-        </div>
-      )}
+      {/* Clean Cyber Ambient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/15 via-black/80 to-black opacity-60 pointer-events-none" />
+      </div>
 
       {/* Technical Corner Labels - Social Links */}
       <a href="https://github.com/ankush850" target="_blank" rel="noopener noreferrer" className="absolute top-24 left-6 md:left-12 font-mono text-[10px] text-muted-foreground tracking-widest opacity-90 hover:opacity-100 transition-opacity hidden md:block z-50 pointer-events-auto cursor-pointer">
@@ -79,7 +50,7 @@ const Hero = () => {
         [ EMAIL: ANKUSHSINGHRAWAT154@GMAIL.COM ]
       </a>
 
-      {/* Shortcut Hint - Relocated to avoid 3D control overlap */}
+      {/* Shortcut Hint */}
       <div className="absolute top-32 right-6 md:right-12 flex flex-col items-end gap-2 font-mono text-[9px] text-white/20 tracking-[0.2em] hidden md:flex z-50 select-none">
         <div className="flex items-center gap-2 px-2 py-1 border border-white/5 bg-white/[0.02] rounded backdrop-blur-sm group hover:border-emerald-500/30 hover:text-white/60 transition-all duration-500">
           <span className="text-emerald-500/40 group-hover:text-emerald-400 transition-colors">⌘K</span> COMMAND_MENU
@@ -190,9 +161,8 @@ const Hero = () => {
                       target.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  className="group relative inline-flex items-center gap-4 px-8 py-3 bg-white text-black font-bold text-xs tracking-widest uppercase overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                  className="group relative inline-flex items-center gap-4 px-8 py-3 bg-white text-black font-bold text-xs tracking-widest uppercase overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] cursor-pointer"
                 >
-                  {/* White glow pulse on hover */}
                   <div className="absolute inset-0 bg-gradient-to-r from-white via-emerald-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <span className="relative z-10 flex items-center gap-2 text-black">
                     View Projects <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -209,9 +179,8 @@ const Hero = () => {
                       target.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  className="group relative inline-flex items-center gap-4 px-8 py-3 border border-white/20 text-white font-bold text-xs tracking-widest uppercase overflow-hidden transition-all hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                  className="group relative inline-flex items-center gap-4 px-8 py-3 border border-white/20 text-white font-bold text-xs tracking-widest uppercase overflow-hidden transition-all hover:border-emerald-500/40 hover:bg-emerald-500/5 cursor-pointer"
                 >
-                  {/* Gradient border shine */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
                   <span className="relative z-10">INITIATE CONTACT</span>
                 </a>
@@ -219,7 +188,7 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Right side Experience Card — improved corner animations */}
+          {/* Right side Experience Card */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={!isLoading ? { opacity: 1, x: 0 } : {}}
@@ -227,7 +196,6 @@ const Hero = () => {
             className="flex justify-center pointer-events-auto mt-12 lg:mt-0"
           >
             <motion.div className="relative w-80 h-80" whileHover="hover" initial="initial">
-              {/* Ambient glow behind card */}
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-blue-500/5 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
               <motion.div
@@ -238,7 +206,8 @@ const Hero = () => {
               >
                 <ExperienceTimer startDate={startDate} />
               </motion.div>
-              {/* Decorative corners — smoother spring */}
+
+              {/* Decorative corners */}
               <motion.div
                 variants={{ hover: { scaleX: 1, scaleY: 1, borderColor: "rgba(255,255,255,0.8)" } }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
