@@ -2,6 +2,7 @@
 
 import { lazy } from "react";
 import { motion } from "framer-motion";
+import TopParticleHeader from "@/components/TopParticleHeader";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import SystemStatus from "@/components/SystemStatus";
@@ -24,6 +25,7 @@ const TechStackRadar = lazy(() => import("@/components/TechStackRadar"));
 const ArchitectureGallery = lazy(() => import("@/components/ArchitectureGallery"));
 const AwardSection = lazy(() => import("@/components/AwardSection"));
 const EducationSection = lazy(() => import("@/components/EducationSection"));
+const CollaborationSection = lazy(() => import("@/components/CollaborationSection"));
 const ContactSection = lazy(() => import("@/components/ContactSection"));
 
 const Index = () => {
@@ -47,6 +49,10 @@ const Index = () => {
 
       <div className="min-h-screen bg-transparent text-white selection:bg-white/20 relative z-10">
         <main id="main-content">
+            {/* Top Interactive WebGL Particle Entrance Header */}
+            <TopParticleHeader />
+
+            {/* Main Hero Section */}
             <Hero />
             <SystemStatus />
             
@@ -92,6 +98,10 @@ const Index = () => {
 
             <LazySection sectionId="education" minHeight="700px">
               <EducationSection />
+            </LazySection>
+
+            <LazySection sectionId="collaborate" minHeight="600px">
+              <CollaborationSection />
             </LazySection>
 
             <LazySection sectionId="contact" minHeight="800px">

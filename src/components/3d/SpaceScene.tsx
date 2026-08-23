@@ -1,20 +1,22 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, PerspectiveCamera, OrbitControls } from "@react-three/drei";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 export const isDJMuted = true;
 
 export type ModelType =
     | "sphere"
+    | "particle_morph"
     | "hypercube"
     | "cyber_crystal"
     | "geodesic_nexus";
 
 const MODEL_OPTIONS: { id: ModelType; label: string }[] = [
     { id: "sphere", label: "SPHERE" },
+    { id: "particle_morph", label: "PARTICLES" },
     { id: "hypercube", label: "HYPERCUBE" },
     { id: "cyber_crystal", label: "CRYSTAL" },
     { id: "geodesic_nexus", label: "NEXUS" },
@@ -62,6 +64,165 @@ const SphereModel = () => (
         </mesh>
     </>
 );
+
+const ParticleMorphModel = ({ text = "ANKUSH RAWAT" }: { text?: string }) => {
+    const pointsRef = useRef<THREE.Points>(null);
+    const N = 3500;
+    const { pointer, camera } = useThree();
+
+    const [buffers] = useState(() => {
+        const spherePos = new Float32Array(N * 3);
+        const textPos = new Float32Array(N * 3);
+        const curPos = new Float32Array(N * 3);
+        const vel = new Float32Array(N * 3);
+        const colors = new Float32Array(N * 3);
+        const baseColors = new Float32Array(N * 3);
+
+        const R = 1.35;
+        for (let i = 0; i < N; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            spherePos[i * 3] = R * Math.sin(phi) * Math.cos(theta);
+            spherePos[i * 3 + 1] = R * Math.sin(phi) * Math.sin(theta);
+            spherePos[i * 3 + 2] = R * Math.cos(phi);
+
+            curPos[i * 3] = spherePos[i * 3];
+            curPos[i * 3 + 1] = spherePos[i * 3 + 1];
+            curPos[i * 3 + 2] = spherePos[i * 3 + 2];
+
+            // Sample text pixels
+            textPos[i * 3] = spherePos[i * 3];
+            textPos[i * 3 + 1] = spherePos[i * 3 + 1];
+            textPos[i * 3 + 2] = 0;
+
+            const isEmerald = Math.random() > 0.35;
+            baseColors[i * 3] = isEmerald ? 0.06 : 0.0;
+            baseColors[i * 3 + 1] = isEmerald ? 0.9 : 0.95;
+            baseColors[i * 3 + 2] = isEmerald ? 0.6 : 0.85;
+
+            colors[i * 3] = baseColors[i * 3];
+            colors[i * 3 + 1] = baseColors[i * 3 + 1];
+            colors[i * 3 + 2] = baseColors[i * 3 + 2];
+        }
+
+        return { spherePos, textPos, curPos, vel, colors, baseColors };
+    });
+
+    useEffect(() => {
+        // Offscreen sampling
+        const tc = document.createElement("canvas");
+        tc.width = 1200;
+        tc.height = 200;
+        const ctx = tc.getContext("2d");
+        if (!ctx) return;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = 'bold 90px "Archivo Black", "Inter", sans-serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text.toUpperCase(), 600, 100);
+
+        const imgData = ctx.getImageData(0, 0, 1200, 200).data;
+        const lit: [number, number][] = [];
+        for (let y = 0; y < 200; y += 2) {
+            for (let x = 0; x < 1200; x += 2) {
+                if (imgData[(y * 1200 + x) * 4] > 80) {
+                    lit.push([x, y]);
+                }
+            }
+        }
+
+        if (lit.length > 100) {
+            for (let i = 0; i < N; i++) {
+                const px = lit[Math.floor(Math.random() * lit.length)];
+                buffers.textPos[i * 3] = (px[0] / 1200 - 0.5) * 4.2;
+                buffers.textPos[i * 3 + 1] = -(px[1] / 200 - 0.5) * 0.9;
+                buffers.textPos[i * 3 + 2] = (Math.random() - 0.5) * 0.15;
+            }
+        }
+    }, [text, buffers, N]);
+
+    const geometry = useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(buffers.curPos, 3));
+        geo.setAttribute("color", new THREE.BufferAttribute(buffers.colors, 3));
+        return geo;
+    }, [buffers]);
+
+    const raycaster = useMemo(() => new THREE.Raycaster(), []);
+    const zPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), []);
+    const mouseWorld = useMemo(() => new THREE.Vector3(999, 999, 0), []);
+
+    useFrame((state) => {
+        if (!pointsRef.current) return;
+        const pos = geometry.attributes.position.array as Float32Array;
+        const col = geometry.attributes.color.array as Float32Array;
+        const time = state.clock.getElapsedTime();
+
+        // Project pointer to world coordinate on z=0 plane
+        raycaster.setFromCamera(pointer, camera);
+        raycaster.ray.intersectPlane(zPlane, mouseWorld);
+
+        // Oscillate morph factor slowly or interact on click
+        const morphFactor = Math.sin(time * 0.5) * 0.5 + 0.5; // 0 (sphere) -> 1 (text)
+        const mx = mouseWorld.x;
+        const my = mouseWorld.y;
+        const REPEL_R = 1.2;
+        const RR = REPEL_R * REPEL_R;
+
+        for (let i = 0; i < N; i++) {
+            const i3 = i * 3;
+            // Target pos interpolated between sphere and text
+            const tx = buffers.spherePos[i3] * (1 - morphFactor) + buffers.textPos[i3] * morphFactor;
+            const ty = buffers.spherePos[i3 + 1] * (1 - morphFactor) + buffers.textPos[i3 + 1] * morphFactor;
+            const tz = buffers.spherePos[i3 + 2] * (1 - morphFactor) + buffers.textPos[i3 + 2] * morphFactor;
+
+            // Spring return
+            buffers.vel[i3] = (buffers.vel[i3] + 0.08 * (tx - pos[i3])) * 0.86;
+            buffers.vel[i3 + 1] = (buffers.vel[i3 + 1] + 0.08 * (ty - pos[i3 + 1])) * 0.86;
+            buffers.vel[i3 + 2] = (buffers.vel[i3 + 2] + 0.08 * (tz - pos[i3 + 2])) * 0.86;
+
+            // Mouse repulsion
+            const dx = pos[i3] - mx;
+            const dy = pos[i3 + 1] - my;
+            const d2 = dx * dx + dy * dy;
+            let cf = 0;
+            if (d2 < RR) {
+                const dist = Math.sqrt(d2) + 0.001;
+                const f = (0.28 * (1 - dist / REPEL_R)) / dist;
+                buffers.vel[i3] += dx * f;
+                buffers.vel[i3 + 1] += dy * f;
+                buffers.vel[i3 + 2] += (Math.random() - 0.5) * f;
+                cf = Math.pow(1 - dist / REPEL_R, 2);
+            }
+
+            pos[i3] += buffers.vel[i3];
+            pos[i3 + 1] += buffers.vel[i3 + 1];
+            pos[i3 + 2] += buffers.vel[i3 + 2];
+
+            // Color perturbation
+            col[i3] = buffers.baseColors[i3] + (1.0 - buffers.baseColors[i3]) * cf;
+            col[i3 + 1] = buffers.baseColors[i3 + 1] + (0.15 - buffers.baseColors[i3 + 1]) * cf;
+            col[i3 + 2] = buffers.baseColors[i3 + 2] + (0.15 - buffers.baseColors[i3 + 2]) * cf;
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.color.needsUpdate = true;
+    });
+
+    return (
+        <points ref={pointsRef} geometry={geometry}>
+            <pointsMaterial
+                size={0.04}
+                vertexColors
+                transparent
+                opacity={0.9}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+            />
+        </points>
+    );
+};
 
 const HypercubeModel = () => (
     <>
@@ -246,17 +407,19 @@ const HeroObjectFixed = ({ animEnabled, activeModel }: { animEnabled: boolean; a
         if (!groupRef.current) return;
 
         // Continuous smooth ambient rotation
-        groupRef.current.rotation.y += 0.003;
-        groupRef.current.rotation.x += 0.001;
+        if (activeModel !== "particle_morph") {
+            groupRef.current.rotation.y += 0.003;
+            groupRef.current.rotation.x += 0.001;
+        }
 
         // Smooth scaling: toggles between 0.8 (normal) and 1.6 (enlarged) on double click
-        const baseScale = isEnlarged ? 1.6 : 0.8;
+        const baseScale = isEnlarged ? 1.6 : (activeModel === "particle_morph" ? 1.1 : 0.8);
         const targetScale = hovered ? baseScale * 1.12 : baseScale;
         groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     });
 
     return (
-        <Float speed={animEnabled ? 1.5 : 0} rotationIntensity={animEnabled ? 0.3 : 0} floatIntensity={animEnabled ? 0.3 : 0}>
+        <Float speed={animEnabled ? 1.5 : 0} rotationIntensity={animEnabled && activeModel !== "particle_morph" ? 0.3 : 0} floatIntensity={animEnabled ? 0.25 : 0}>
             <group
                 ref={groupRef}
                 onPointerOver={(e) => {
@@ -275,6 +438,7 @@ const HeroObjectFixed = ({ animEnabled, activeModel }: { animEnabled: boolean; a
                 }}
             >
                 {activeModel === "sphere" && <SphereModel />}
+                {activeModel === "particle_morph" && <ParticleMorphModel text="ANKUSH RAWAT" />}
                 {activeModel === "hypercube" && <HypercubeModel />}
                 {activeModel === "cyber_crystal" && <CyberCrystalModel />}
                 {activeModel === "geodesic_nexus" && <GeodesicNexusModel />}
@@ -302,7 +466,7 @@ const SpaceScene = () => {
 
     return (
         <div className="absolute inset-0 z-0 pointer-events-auto">
-            {/* 3D Model Switcher Controls Bar - Shifted right (left-[56%]) to align under 3D model */}
+            {/* 3D Model Switcher Controls Bar */}
             <div className="absolute bottom-10 left-[56%] -translate-x-1/2 z-30 hidden md:flex items-center gap-1.5 p-1.5 bg-black/85 border border-emerald-500/40 rounded-full backdrop-blur-xl font-mono text-[10px] shadow-[0_0_25px_rgba(16,185,129,0.25)] pointer-events-auto select-none">
                 <span className="px-2.5 py-1 text-emerald-400 font-bold uppercase tracking-widest border-r border-white/10 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />

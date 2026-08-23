@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowUpRight, X, Volume2, VolumeX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLoading } from "@/context/LoadingContext";
 
 const LandingPage = () => {
+  const [isMounted, setIsMounted] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
@@ -13,22 +14,28 @@ const LandingPage = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Control muted via React state only — no direct DOM mutation to avoid desync
   const toggleMute = () => setIsMuted((prev) => !prev);
 
   return (
-    <div className="relative w-full h-[100dvh] overflow-hidden bg-black text-white font-inter">
-      {/* Background Video */}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted={isMuted}
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover object-[75%_center] md:object-center z-0"
-      >
-        <source src="/assets/video/video.mp4" type="video/mp4" />
-      </video>
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-black text-white font-inter" suppressHydrationWarning>
+      {/* Background Video (Mounted on client to prevent browser extension hydration mismatches) */}
+      {isMounted && (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted={isMuted}
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-[75%_center] md:object-center z-0"
+        >
+          <source src="/assets/video/video.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* Overlay to ensure text readability if needed (optional but good practice) */}
       <div className="absolute inset-0 bg-black/30 z-0"></div>
